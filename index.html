@@ -1,0 +1,103 @@
+<!doctype html>
+<html>
+<head>
+    <title>Socket.IO chat</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font: 13px Helvetica, Arial;
+        }
+
+        form {
+            height: 42px;
+            background: #000;
+            padding: 3px;
+            position: relative;
+            bottom: 0;
+            width: 100%;
+        }
+
+        form input {
+            border: 0;
+            padding: 10px;
+            width: 90%;
+            margin-right: .5%;
+        }
+
+        form button {
+            width: 9%;
+            background: rgb(130, 224, 255);
+            border: none;
+            padding: 10px;
+        }
+
+        #messages {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        #messages li {
+            padding: 5px 10px;
+        }
+        #messages li span{
+            float: right;
+        }
+
+        #messages li:nth-child(odd) {
+            background: #eee;
+        }
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+</head>
+<body>
+<form action="">
+    <input id="m" autocomplete="off"/>
+    <button>Send</button>
+</form>
+<div class='contentMain'>
+    <ul id="messages"></ul>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    function guid() {
+        function s4() {
+            return Math.floor((1 + Math.random()) * 0x10000)
+                    .toString(16)
+                    .substring(1);
+        }
+        return s4();
+        //return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+    }
+    var uuidNow = 'nickname';
+
+    if (typeof(Storage) !== "undefined") {
+        if (localStorage.getItem("uuid")) {
+            uuidNow = localStorage.getItem("uuid");
+        } else {
+            uuidNow = guid();
+            localStorage.setItem("uuid", uuidNow);
+        }
+    }else{
+        alert('您的瀏覽器不支援id產生');
+    }
+
+    var socket = io();
+    $('form').submit(function () {
+        socket.emit('chat message', {'msg':$('#m').val(), 'id':uuidNow});
+        $('#m').val('');
+        return false;
+    });
+    socket.on('chat message', function (msg) {
+
+        $('#messages').prepend($('<li>').text(msg.msg).append($('<span>').text(msg.id+"-"+msg.ctime)));
+    });
+</script>
+</body>
+</html>
